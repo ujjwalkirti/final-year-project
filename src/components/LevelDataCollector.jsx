@@ -95,6 +95,7 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
         <div>
           <p>Safe Bearing Capacity (SBC) : NSBC + q =</p>
         </div>
+        <input type={`submit`} value="Calculate Bearing Capacity" />
       </form>
     </div>
   );
