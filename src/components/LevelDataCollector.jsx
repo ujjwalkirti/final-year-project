@@ -73,6 +73,28 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
           Factor of Safety (based on the type of soil, like for sand it is 3):
           <input type={`number`} required />
         </div>
+        <div>
+          <p>
+            Calculating N<sub>Φ</sub>
+          </p>
+        </div>
+        <div>
+          <p>
+            Ultimate net Bearing Capacity (q<sub>d</sub>):
+          </p>
+          <p>We use the following formula:</p>
+          <p>
+            q*(N<sub>q</sub>-1)*S<sub>q</sub>*d<sub>q</sub>*i<sub>q</sub>
+            +1/2*B*γ*N<sub>γ</sub>*S<sub>γ</sub>*d<sub>γ</sub>*i<sub>γ</sub>*W
+            <sup>'</sup>
+          </p>
+        </div>
+        <div>
+          Net Safe Bearing Capacity (NSBC) : q<sub>d</sub>/3 ={" "}
+        </div>
+        <div>
+          <p>Safe Bearing Capacity (SBC) : NSBC + q =</p>
+        </div>
       </form>
     </div>
   );

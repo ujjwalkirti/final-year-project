@@ -1,5 +1,5 @@
 import React from "react";
-import './Heading.css'
+import "./Heading.css";
 
 const Heading = () => {
   return (
@@ -9,7 +9,7 @@ const Heading = () => {
         different zones of Surat City
       </p>
       <div className="heading-made-by">
-        <p>mady by:</p>
+        <p>made by:</p>
         <div className="made-by-name">
           <div>
             <p>Kumar Sundaram</p>
