@@ -18,7 +18,12 @@ function App() {
           value={levels}
           type="number"
           onChange={(e) => {
-            setLevels(parseInt(e.target.value, 10));
+            let set_level = parseInt(e.target.value, 10);
+            if (set_level > 0) {
+              setLevels(set_level);
+            } else {
+              alert("Be careful about what are you entering!");
+            }
           }}
         />
       </div>
