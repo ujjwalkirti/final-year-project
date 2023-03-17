@@ -12,6 +12,9 @@ ISCodeValues.set(40, { Nc: 5.14, Nq: 1.0, Ny: 0.0 });
 ISCodeValues.set(45, { Nc: 5.14, Nq: 1.0, Ny: 0.0 });
 ISCodeValues.set(50, { Nc: 5.14, Nq: 1.0, Ny: 0.0 });
 
-const factorsOfSafety = [{ sand: 3 }];
+const factorsOfSafety = new Map();
 
-export { ISCodeValues };
+factorsOfSafety.set('sandy', 3);
+
+
+export { ISCodeValues,factorsOfSafety };

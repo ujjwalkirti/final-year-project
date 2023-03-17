@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import DataCollectionWrapper from "./components/DataCollectionWrapper";
 import Heading from "./components/Heading";
-import LevelDataCollector from "./components/LevelDataCollector";
 
 function App() {
-  const [levels, setLevels] = useState(0);
+  const [levels, setLevels] = useState(1);
   // useEffect(() => {
   //   console.log(typeof levels);
   // }, [levels]);
@@ -30,9 +30,9 @@ function App() {
       <div>
         {[...Array(levels)].map((e, i) => {
           return (
-            <section key={i}>
-              <p>Level {i + 1}</p>
-              <LevelDataCollector BoreLogNumber={i + 1} />
+            <section className="level-container" key={i}>
+              <p className="level-sign">Level {i + 1}</p>
+              <DataCollectionWrapper level={i+1} />
             </section>
           );
         })}

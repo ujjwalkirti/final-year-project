@@ -31,7 +31,10 @@ const Heading = () => {
         <p>under the guidance of:</p>
         <div className="guidance-name">
           <p>Shruti J Shukla Ma'am</p>
-          <p>Associate Professor</p>
+          <p>
+            Associate Professor, <br />
+            SVNIT, Surat
+          </p>
         </div>
       </div>
     </div>
