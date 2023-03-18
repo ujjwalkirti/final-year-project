@@ -3,7 +3,7 @@
   flex-direction: column;
 }
 .generate-report {
-  cursor: pointer;
+  cursor: not-allowed;
   width: 200px;
   margin: auto;
   background-color: #ffacac;

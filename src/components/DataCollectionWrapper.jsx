@@ -21,6 +21,7 @@ const DataCollectionWrapper = ({ level }) => {
         type={`submit`}
         className="generate-report"
         onClick={printDocument}
+        disabled
       >
         Generate report
       </button>
