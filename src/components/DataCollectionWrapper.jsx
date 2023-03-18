@@ -5,12 +5,13 @@ import "./DataCollectionWrapper.css";
 import LevelDataCollector from "./LevelDataCollector";
 
 function printDocument() {
+  const pdfHolder = document.getElementById("pdfHolder");
   html2canvas(document.getElementById("divToPrint")).then((canvas) => {
-    document.body.appendChild(canvas);
+    pdfHolder.appendChild(canvas);
   });
 }
 
-const DataCollectionWrapper = ({level}) => {
+const DataCollectionWrapper = ({ level }) => {
   return (
     <div className="parent-wrapper-data-collection">
       <div id="divToPrint">
@@ -23,6 +24,7 @@ const DataCollectionWrapper = ({level}) => {
       >
         Generate report
       </button>
+      <div id="pdfHolder"></div>
     </div>
   );
 };

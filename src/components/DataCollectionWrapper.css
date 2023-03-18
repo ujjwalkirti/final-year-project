@@ -1,0 +1,16 @@
+.parent-wrapper-data-collection {
+  display: flex;
+  flex-direction: column;
+}
+.generate-report {
+  cursor: pointer;
+  width: 200px;
+  margin: auto;
+  background-color: #ffacac;
+  /* border: none; */
+  color: white;
+  padding: 10px;
+  font-size: 24px;
+  border: 1px solid #ffacac;
+  border-radius: 10px;
+}

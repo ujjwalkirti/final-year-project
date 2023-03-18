@@ -131,7 +131,7 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               onChange={(e) => setVoidRatio(e.target.value)}
             />
           </span>
-          <span>
+          <span className="">
             γ<sup>'</sup> (submerged unit weight of soil) = γ<sub>w</sub>
             *(G-1)/(1+e) = {submergedUnitWeight}
           </span>
@@ -300,7 +300,8 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
         </div>
         {/* div for calculating depth factor */}
         <div className="site-info depth-factor">
-          <span>
+          <p>For calculating the depth factor</p>
+          <span className="formula">
             d<sub>c</sub> = 1 + 0.2*(D<sub>f</sub>/B)*
             <span>&#8730;</span>
             <span style={{ borderTop: "1px solid black" }}>
@@ -323,8 +324,9 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
           </span>
         </div>
         {/* div for calculating inclination factor */}
-        <div className="site-info">
-          <span>
+        <div className="site-info inclination-factor">
+          <p>For Calculating inclination Factor,</p>
+          <span className="formula">
             i<sub>c</sub> = i<sub>q</sub> = (1- α/90)<sup>2</sup> ={" "}
             {inclinationFactors.ic}
           </span>
@@ -381,42 +383,47 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               likey to rise to the base of the footing or above?
             </label>
           </span>
-          <span>
-            {" "}
-            <input
-              type={`checkbox`}
-              id="option3"
-              // checked={waterTableFactor !== 1 && waterTableFactor !== 0.5}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setAdditionalInputFactor(true);
-                }
-              }}
-            />
-            <label htmlFor="option3">
-              Is the water table likely to permanent get located at depth lying
-              between {Df} (D<sub>f</sub>) and {Df + 200} cms (D<sub>f</sub> +
-              B)?
-            </label>
+          <span className="additional-input-factor">
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <input
+                type={`checkbox`}
+                id="option3"
+                checked={waterTableFactor !== 1 && waterTableFactor !== 0.5}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setAdditionalInputFactor(true);
+                    setWaterTableFactor(NaN);
+                  }
+                }}
+              />
+              <label htmlFor="option3">
+                Is the water table likely to permanent get located at depth
+                lying between {Df} (D<sub>f</sub>) and {Df + 200} cms (D
+                <sub>f</sub> + B)?
+              </label>
+            </div>
             <div>
               {additionalInputFactor && (
                 <input
                   type={`number`}
                   required
-                  className="additional-input-factor"
+                  style={{ width: "80%" }}
                   placeholder="Please enter the depth in centimetres"
                   onChange={(e) => {
                     let local_water_table_factor = 0;
-                    local_water_table_factor = (Df - e.target.value) / 400 + 1;
+                    local_water_table_factor =
+                      (Df - parseInt(e.target.value, 10)) / 400 + 1;
                     setWaterTableFactor(local_water_table_factor);
                   }}
                 />
               )}
             </div>
           </span>
-          <div className="water-table-factor-value">
-            W<sup>'</sup>= {waterTableFactor}
-          </div>
+          {!isNaN(waterTableFactor) && (
+            <div className="water-table-factor-value">
+              W<sup>'</sup>= {waterTableFactor}
+            </div>
+          )}
         </div>
         <div className="site-info">
           <p>

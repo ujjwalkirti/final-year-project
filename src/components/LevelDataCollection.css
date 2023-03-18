@@ -62,8 +62,24 @@ td {
   gap: 10px;
 }
 
+.depth-factor {
+  align-items: center;
+}
+
 .depth-factor span:first-of-type {
   margin-top: 10px;
+}
+
+.depth-factor p {
+  width: 100%;
+}
+
+.inclination-factor {
+  align-items: center;
+}
+
+.inclination-factor p {
+  width: 100%;
 }
 
 .water-table-factor {
@@ -79,8 +95,11 @@ td {
   gap: 10px;
 }
 
-.additional-input-factor {
-  
+.additional-input-factor div {
+  width: 50%;
+}
+.additional-input-factor div input{
+  /* width: 100%; */
 }
 
 .water-table-factor-value {
@@ -98,4 +117,10 @@ td {
   margin: auto;
 
   padding: 6px 12px;
+}
+
+.formula {
+  border: 1px solid black;
+  width: auto;
+  padding: 5px 10px;
 }
