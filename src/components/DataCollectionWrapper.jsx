@@ -4,14 +4,13 @@ import React, { useState } from "react";
 import "./DataCollectionWrapper.css";
 import LevelDataCollector from "./LevelDataCollector";
 
-function printDocument() {
-  const pdfHolder = document.getElementById("pdfHolder");
-  html2canvas(document.getElementById("divToPrint")).then((canvas) => {
-    pdfHolder.appendChild(canvas);
-  });
-}
-
 const DataCollectionWrapper = ({ level }) => {
+  function printDocument() {
+    const pdfHolder = document.getElementById("pdfHolder" + level);
+    html2canvas(document.getElementById("divToPrint")).then((canvas) => {
+      pdfHolder.appendChild(canvas);
+    });
+  }
   return (
     <div className="parent-wrapper-data-collection">
       <div id="divToPrint">
@@ -21,11 +20,11 @@ const DataCollectionWrapper = ({ level }) => {
         type={`submit`}
         className="generate-report"
         onClick={printDocument}
-        disabled
+        // disabled
       >
         Generate report
       </button>
-      <div id="pdfHolder"></div>
+      <div id={"pdfHolder" + level}></div>
     </div>
   );
 };

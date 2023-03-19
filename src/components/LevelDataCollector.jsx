@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { factorsOfSafety, ISCodeValues } from "../data";
 import "./LevelDataCollection.css";
 
@@ -27,7 +27,7 @@ function calculateNetBearingCapacity(
   return (
     c * Nc * sc * ic * dc +
     q * (Nq - 1) * sq * dq * iq +
-    0.5 * 200 * y * Ny * sy * dy * iy * W
+    (0.5 * 200 * y * Ny * sy * dy * iy * W) / 1000
   );
 }
 
@@ -35,25 +35,25 @@ function interpolateValues(
   upperbound,
   lowerbound,
   phi,
-  upperValues,
-  lowerValues
+  upperValue,
+  lowerValue
 ) {
   return (
-    ((upperValues - lowerValues) * (phi - lowerbound)) /
+    ((upperValue - lowerValue) * (phi - lowerbound)) /
       (upperbound - lowerbound) +
-    lowerValues
+    lowerValue
   );
 }
 
 function calculateBearingCapacityFactors(phi) {
   let upperbound = 0;
   let lowerbound = 0;
-  let multipleOfTen = phi / 10;
+  let multipleOfTen = parseInt(phi / 10, 10);
   lowerbound = multipleOfTen * 10;
-  upperbound = (multipleOfTen + 1) * 10;
+  upperbound = lowerbound + 5;
   const lowerValues = ISCodeValues.get(lowerbound);
   const higherValues = ISCodeValues.get(upperbound);
-  console.log(lowerValues, higherValues);
+  // console.log(lowerValues, higherValues, phi, multipleOfTen);
   const Nc = interpolateValues(
     upperbound,
     lowerbound,
@@ -75,7 +75,7 @@ function calculateBearingCapacityFactors(phi) {
     higherValues.Ny,
     lowerValues.Ny
   );
-  return [{ Nc, Nq, Ny }];
+  return { Nc, Nq, Ny };
 }
 
 const LevelDataCollector = ({ BoreLogNumber }) => {
@@ -86,27 +86,27 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
   const [specificGravity, setSpecificGravity] = useState(0);
   const [voidRatio, setVoidRatio] = useState(0);
   const [submergedUnitWeight, setSubmergedUnitWeight] = useState(
-    (unitWeight * (specificGravity - 1)) / (1 + voidRatio)
+    (0.981 * (specificGravity - 1)) / (1 + voidRatio)
   );
   const [overBurdenPressure, setOverBurdenPressure] = useState(
-    (submergedUnitWeight * Df) / 100
+    (submergedUnitWeight * Df) / 1000
   );
   const [NValue, setNValue] = useState(0);
   const [phi, setPhi] = useState(0);
   const [cohesion, setCohesion] = useState(0);
   const [Dw, setDw] = useState(1);
-  const [FOS, setFOS] = useState(0);
+  const [FOS, setFOS] = useState(factorsOfSafety.get("sandy"));
   const [Nphi, setNphi] = useState(
-    Math.pow(Math.tan(Math.PI / 4 + phi / 2), 2)
+    Math.pow(Math.tan(Math.PI / 4 + degreeToRadians(phi) / 2), 2)
   );
   const [bearingCapacityFactors, setBearingCapacityFactors] = useState(
     calculateBearingCapacityFactors(phi)
   );
 
   const [shapeFactors, setShapeFactors] = useState({
-    sc: 1 + (0.2 * 200) / 200,
-    sq: 1 + (0.2 * 200) / 200,
-    sy: 1 + (0.4 * 200) / 200,
+    sc: 1.3,
+    sq: 1.2,
+    sy: 0.8,
   });
 
   const [depthFactors, setDepthFactors] = useState({
@@ -126,6 +126,39 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
   };
+  const [changedOnce, setChangedOnce] = useState(false);
+
+  useEffect(() => {
+    if (changedOnce) {
+      setSubmergedUnitWeight((0.981 * (specificGravity - 1)) / (1 + voidRatio));
+      setOverBurdenPressure((submergedUnitWeight * Df) / 1000);
+      setNphi(Math.pow(Math.tan(Math.PI / 4 + degreeToRadians(phi) / 2), 2));
+      setBearingCapacityFactors(calculateBearingCapacityFactors(phi));
+      console.log(bearingCapacityFactors);
+      setDepthFactors({
+        dc: 1 + 0.2 * (Df / 200) * Math.sqrt(Nphi),
+        dq: phi < 10 ? 1 : 1 + 0.1 * (Df / 200) * Math.sqrt(Nphi),
+        dy: phi < 10 ? 1 : 1 + 0.1 * (Df / 200) * Math.sqrt(Nphi),
+      });
+      setInclinationFactors({
+        ic: Math.pow(1 - inclinationToVertical / 90, 2),
+        iq: Math.pow(1 - inclinationToVertical / 90, 2),
+        iy: Math.pow(1 - inclinationToVertical / phi, 2),
+      });
+    } else {
+      setChangedOnce(true);
+    }
+  }, [
+    Df,
+    inclinationToVertical,
+    spt,
+    unitWeight,
+    specificGravity,
+    voidRatio,
+    NValue,
+    phi,
+    cohesion,
+  ]);
 
   return (
     <div className="parent">
@@ -140,7 +173,7 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               required
               value={Df}
               onChange={(e) => {
-                setDf(parseInt(e.target.value, 10));
+                setDf(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -151,7 +184,9 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               required
               value={inclinationToVertical}
               onChange={(e) => {
-                setInclinationToVertical(degreeToRadians(e.target.value));
+                setInclinationToVertical(
+                  degreeToRadians(parseFloat(e.target.value))
+                );
               }}
             />
           </span>
@@ -164,7 +199,7 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               required
               value={spt}
               onChange={(e) => {
-                setSpt(e.target.value);
+                setSpt(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -176,7 +211,7 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               required
               placeholder="Please enter the value in Kg/cm^2"
               onChange={(e) => {
-                setUnitWeight(e.target.value);
+                setUnitWeight(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -187,7 +222,7 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               required
               value={specificGravity}
               onChange={(e) => {
-                setSpecificGravity(e.target.value);
+                setSpecificGravity(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -197,7 +232,10 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               type={`number`}
               required
               value={voidRatio}
-              onChange={(e) => setVoidRatio(e.target.value)}
+              onChange={(e) => {
+                // console.log(voidRatio);
+                setVoidRatio(parseFloat(e.target.value));
+              }}
             />
           </span>
           <span className="">
@@ -205,7 +243,7 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
             *(G-1)/(1+e) = {submergedUnitWeight}
           </span>
           <span>
-            Overburden Pressure (q) : (γ<sup>'</sup>*D)/100 ={" "}
+            Overburden Pressure (q) : (γ<sup>'</sup>*D)/1000 ={" "}
             {overBurdenPressure}
           </span>
           <span>
@@ -214,7 +252,7 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               type={`number`}
               required
               value={NValue}
-              onChange={(e) => setNValue(e.target.value)}
+              onChange={(e) => setNValue(parseFloat(e.target.value))}
             />
           </span>
           <span>
@@ -222,9 +260,9 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
             <input
               type={`number`}
               required
-              // value={phi}
+              value={phi}
               placeholder="Enter the value in degrees"
-              onChange={(e) => setPhi(degreeToRadians(e.target.value))}
+              onChange={(e) => setPhi(parseInt(e.target.value))}
             />
           </span>
           <span>
@@ -234,7 +272,7 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               required
               placeholder="Please enter the unit as Kg/cm^2"
               onChange={(e) => {
-                setCohesion(e.target.value);
+                setCohesion(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -246,44 +284,14 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
           </div>
           <div>
             Depth of foundation below Ground Level (D<sub>f</sub>) ={" "}
-            <span>{Df * 100} cm</span>
+            <span>{Df} cm</span>
           </div>
           <div>
             Length of foundation (l) = <span>200cm</span>
           </div>
           <div>Shape of base ={">"} Square</div>
         </div>
-        <div className="site-info">
-          <label>Is water table found?</label>
-          {/* add radio button here to select yes or no and then decide value of Dw */}
-          <div>
-            {" "}
-            <input
-              type="radio"
-              name="water-Table"
-              id="waterTableNotFound"
-              value="No"
-              onChange={(e) => setDw(1)}
-            />
-            <label htmlFor="waterTableNotFound">No</label>
-          </div>
-          <div>
-            {" "}
-            <input
-              type="radio"
-              name="water-Table"
-              id="waterTableFound"
-              value="Yes"
-              // this needs to be checked !!!!!!!!!!!!!!!!!!!!!!!
-              onChange={(e) => setDw(2)}
-            />
-            <label htmlFor="waterTableFound">Yes</label>
-          </div>
-          <p>
-            D<sub>w</sub>{" "}
-            {Dw === 1 ? "Water table not Found" : "Water table found"} = {Dw}
-          </p>
-        </div>
+
         <div className="site-fos-selection">
           <strong>Factor of Safety</strong> (based on the type of soil, like for
           sand it is 3):
@@ -411,12 +419,12 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
             {inclinationFactors.ic}
           </span>
           {isNaN(inclinationFactors.iy) ? (
-            <span>
+            <span className="formula">
               i<sub>γ</sub> will be calcuated automatically if there is valid
               vale of Φ.
             </span>
           ) : (
-            <span>
+            <span className="formula">
               i<sub>γ</sub> = (1 - α/Φ)<sup>2</sup> = {inclinationFactors.iy}
             </span>
           )}
@@ -511,7 +519,9 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
           </p>
           <p>We use the following formula:</p>
           <p className="bearing-capacity-formula">
-            q*(N<sub>q</sub>-1)*S<sub>q</sub>*d<sub>q</sub>*i<sub>q</sub>
+            q<sub>d</sub> = C*N<sub>c</sub>*s<sub>c</sub>*d<sub>c</sub>*i
+            <sub>c</sub>+q*(N
+            <sub>q</sub>-1)*S<sub>q</sub>*d<sub>q</sub>*i<sub>q</sub>
             +1/2*B*γ*N<sub>γ</sub>*S<sub>γ</sub>*d<sub>γ</sub>*i<sub>γ</sub>*W
             <sup>'</sup>{" "}
             {isNaN(
@@ -581,31 +591,9 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
         ) : (
           <div className="site-info">
             <div>
-              Net Safe Bearing Capacity (NSBC) : q<sub>d</sub>/3 ={" "}
-              {calculateNetBearingCapacity(
-                cohesion,
-                bearingCapacityFactors.Nc,
-                shapeFactors.sc,
-                inclinationFactors.ic,
-                depthFactors.dc,
-                overBurdenPressure,
-                bearingCapacityFactors.Nq,
-                shapeFactors.sq,
-                depthFactors.dq,
-                inclinationFactors.iq,
-                unitWeight,
-                bearingCapacityFactors.Ny,
-                shapeFactors.sy,
-                depthFactors.dy,
-                inclinationFactors.iq,
-                waterTableFactor
-              ) /
-                3 +
-                " Kg/cm^2"}
-            </div>
-            <div>
-              <p>
-                Safe Bearing Capacity (SBC) : NSBC + q ={" "}
+              <strong>Net Safe Bearing Capacity (NSBC)</strong> : q<sub>d</sub>/
+              {FOS} ={" "}
+              <strong>
                 {calculateNetBearingCapacity(
                   cohesion,
                   bearingCapacityFactors.Nc,
@@ -624,9 +612,36 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
                   inclinationFactors.iq,
                   waterTableFactor
                 ) /
-                  3 +
-                  overBurdenPressure +
+                  FOS +
                   " Kg/cm^2"}
+              </strong>
+            </div>
+            <div>
+              <p>
+                <strong>Safe Bearing Capacity (SBC)</strong> : NSBC + q ={" "}
+                <strong>
+                  {calculateNetBearingCapacity(
+                    cohesion,
+                    bearingCapacityFactors.Nc,
+                    shapeFactors.sc,
+                    inclinationFactors.ic,
+                    depthFactors.dc,
+                    overBurdenPressure,
+                    bearingCapacityFactors.Nq,
+                    shapeFactors.sq,
+                    depthFactors.dq,
+                    inclinationFactors.iq,
+                    unitWeight,
+                    bearingCapacityFactors.Ny,
+                    shapeFactors.sy,
+                    depthFactors.dy,
+                    inclinationFactors.iq,
+                    waterTableFactor
+                  ) /
+                    3 +
+                    overBurdenPressure +
+                    " Kg/cm^2"}
+                </strong>
               </p>
             </div>
           </div>
