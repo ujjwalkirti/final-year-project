@@ -18,14 +18,14 @@ const DataCollectionWrapper = ({ location, level }) => {
       <div id={"divToPrint" + level}>
         <LevelDataCollector location={location} BoreLogNumber={level} />
       </div>
-      <button
+      {/* <button
         type={`submit`}
         className="generate-report"
         onClick={printDocument}
         // disabled
       >
         Generate Report
-      </button>
+      </button> */}
       <div id={"pdfHolder" + level}></div>
     </div>
   );
