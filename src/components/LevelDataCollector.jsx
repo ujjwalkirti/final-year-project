@@ -11,6 +11,25 @@ function degreeToRadians(degree) {
   return (degree * Math.PI) / 180;
 }
 
+function roundTo(n, digits) {
+  var negative = false;
+  if (digits === undefined) {
+    digits = 0;
+  }
+  if (n < 0) {
+    negative = true;
+    n = n * -1;
+  }
+  var multiplicator = Math.pow(10, digits);
+  n = parseFloat((n * multiplicator).toFixed(11));
+  n = (Math.round(n) / multiplicator).toFixed(digits);
+  if (negative) {
+    n = (n * -1).toFixed(digits);
+  }
+  // console.log(parseFloat(n));
+  return parseFloat(n);
+}
+
 function calculateNetBearingCapacity(
   c,
   Nc,
@@ -590,25 +609,28 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
             )
               ? ""
               : "= " +
-                calculateNetBearingCapacity(
-                  cohesion,
-                  bearingCapacityFactors.Nc,
-                  shapeFactors.sc,
-                  inclinationFactors.ic,
-                  depthFactors.dc,
-                  overBurdenPressure,
-                  bearingCapacityFactors.Nq,
-                  shapeFactors.sq,
-                  depthFactors.dq,
-                  inclinationFactors.iq,
-                  unitWeight,
-                  bearingCapacityFactors.Ny,
-                  shapeFactors.sy,
-                  depthFactors.dy,
-                  inclinationFactors.iq,
-                  waterTableFactor,
-                  Df,
-                  "iscode"
+                roundTo(
+                  calculateNetBearingCapacity(
+                    cohesion,
+                    bearingCapacityFactors.Nc,
+                    shapeFactors.sc,
+                    inclinationFactors.ic,
+                    depthFactors.dc,
+                    overBurdenPressure,
+                    bearingCapacityFactors.Nq,
+                    shapeFactors.sq,
+                    depthFactors.dq,
+                    inclinationFactors.iq,
+                    unitWeight,
+                    bearingCapacityFactors.Ny,
+                    shapeFactors.sy,
+                    depthFactors.dy,
+                    inclinationFactors.iq,
+                    waterTableFactor,
+                    Df,
+                    "iscode"
+                  ),
+                  3
                 ) +
                 " Kg/cm^2"}
           </p>
@@ -642,35 +664,8 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               <strong>Net Safe Bearing Capacity (NSBC)</strong> : q<sub>d</sub>/
               {FOS} ={" "}
               <strong>
-                {calculateNetBearingCapacity(
-                  cohesion,
-                  bearingCapacityFactors.Nc,
-                  shapeFactors.sc,
-                  inclinationFactors.ic,
-                  depthFactors.dc,
-                  overBurdenPressure,
-                  bearingCapacityFactors.Nq,
-                  shapeFactors.sq,
-                  depthFactors.dq,
-                  inclinationFactors.iq,
-                  unitWeight,
-                  bearingCapacityFactors.Ny,
-                  shapeFactors.sy,
-                  depthFactors.dy,
-                  inclinationFactors.iq,
-                  waterTableFactor,
-                  Df,
-                  "iscode"
-                ) /
-                  FOS +
-                  " Kg/cm^2"}
-              </strong>
-            </div>
-            <div>
-              <p>
-                <strong>Safe Bearing Capacity (SBC)</strong> : NSBC + q ={" "}
-                <strong>
-                  {calculateNetBearingCapacity(
+                {roundTo(
+                  calculateNetBearingCapacity(
                     cohesion,
                     bearingCapacityFactors.Nc,
                     shapeFactors.sc,
@@ -689,10 +684,40 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                     waterTableFactor,
                     Df,
                     "iscode"
-                  ) /
-                    3 +
-                    overBurdenPressure +
-                    " Kg/cm^2"}
+                  ) / FOS,
+                  3
+                ) + " Kg/cm^2"}
+              </strong>
+            </div>
+            <div>
+              <p>
+                <strong>Safe Bearing Capacity (SBC)</strong> : NSBC + q ={" "}
+                <strong>
+                  {roundTo(
+                    calculateNetBearingCapacity(
+                      cohesion,
+                      bearingCapacityFactors.Nc,
+                      shapeFactors.sc,
+                      inclinationFactors.ic,
+                      depthFactors.dc,
+                      overBurdenPressure,
+                      bearingCapacityFactors.Nq,
+                      shapeFactors.sq,
+                      depthFactors.dq,
+                      inclinationFactors.iq,
+                      unitWeight,
+                      bearingCapacityFactors.Ny,
+                      shapeFactors.sy,
+                      depthFactors.dy,
+                      inclinationFactors.iq,
+                      waterTableFactor,
+                      Df,
+                      "iscode"
+                    ) /
+                      FOS +
+                      overBurdenPressure,
+                    3
+                  ) + " Kg/cm^2"}
                 </strong>
               </p>
             </div>
@@ -726,71 +751,84 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               <td>{cohesion}</td>
               <td>{phi}</td>
               <td>
-                {calculateNetBearingCapacity(
-                  cohesion,
-                  bearingCapacityFactors.Nc,
-                  shapeFactors.sc,
-                  inclinationFactors.ic,
-                  depthFactors.dc,
-                  overBurdenPressure,
-                  bearingCapacityFactors.Nq,
-                  shapeFactors.sq,
-                  depthFactors.dq,
-                  inclinationFactors.iq,
-                  submergedUnitWeight,
-                  bearingCapacityFactors.Ny,
-                  shapeFactors.sy,
-                  depthFactors.dy,
-                  inclinationFactors.iq,
-                  waterTableFactor,
-                  Df,
-                  "iscode"
-                ) /
-                  3 +
-                  overBurdenPressure}
-              </td>
-              <td>
-                {calculateNetBearingCapacity(
-                  cohesion,
-                  bearingCapacityFactors.Nc,
-                  shapeFactors.sc,
-                  inclinationFactors.ic,
-                  depthFactors.dc,
-                  overBurdenPressure,
-                  bearingCapacityFactors.Nq,
-                  shapeFactors.sq,
-                  depthFactors.dq,
-                  inclinationFactors.iq,
-                  unitWeight,
-                  bearingCapacityFactors.Ny,
-                  shapeFactors.sy,
-                  depthFactors.dy,
-                  inclinationFactors.iq,
-                  waterTableFactor,
-                  Df,
-                  "terzaghi"
+                {roundTo(
+                  calculateNetBearingCapacity(
+                    cohesion,
+                    bearingCapacityFactors.Nc,
+                    shapeFactors.sc,
+                    inclinationFactors.ic,
+                    depthFactors.dc,
+                    overBurdenPressure,
+                    bearingCapacityFactors.Nq,
+                    shapeFactors.sq,
+                    depthFactors.dq,
+                    inclinationFactors.iq,
+                    unitWeight,
+                    bearingCapacityFactors.Ny,
+                    shapeFactors.sy,
+                    depthFactors.dy,
+                    inclinationFactors.iq,
+                    waterTableFactor,
+                    Df,
+                    "iscode"
+                  ) /
+                    FOS +
+                    overBurdenPressure,
+                  3
                 )}
               </td>
               <td>
-                {calculateNetBearingCapacity(
-                  cohesion,
-                  bearingCapacityFactors.Nc,
-                  shapeFactors.sc,
-                  inclinationFactors.ic,
-                  depthFactors.dc,
-                  overBurdenPressure,
-                  bearingCapacityFactors.Nq,
-                  shapeFactors.sq,
-                  depthFactors.dq,
-                  inclinationFactors.iq,
-                  unitWeight,
-                  bearingCapacityFactors.Ny,
-                  shapeFactors.sy,
-                  depthFactors.dy,
-                  inclinationFactors.iq,
-                  waterTableFactor,
-                  Df,
-                  "meyerhoff"
+                {roundTo(
+                  calculateNetBearingCapacity(
+                    cohesion,
+                    bearingCapacityFactors.Nc,
+                    shapeFactors.sc,
+                    inclinationFactors.ic,
+                    depthFactors.dc,
+                    overBurdenPressure,
+                    bearingCapacityFactors.Nq,
+                    shapeFactors.sq,
+                    depthFactors.dq,
+                    inclinationFactors.iq,
+                    unitWeight,
+                    bearingCapacityFactors.Ny,
+                    shapeFactors.sy,
+                    depthFactors.dy,
+                    inclinationFactors.iq,
+                    waterTableFactor,
+                    Df,
+                    "terzaghi"
+                  ) /
+                    3 +
+                    overBurdenPressure,
+                  3
+                )}
+              </td>
+              <td>
+                {roundTo(
+                  calculateNetBearingCapacity(
+                    cohesion,
+                    bearingCapacityFactors.Nc,
+                    shapeFactors.sc,
+                    inclinationFactors.ic,
+                    depthFactors.dc,
+                    overBurdenPressure,
+                    bearingCapacityFactors.Nq,
+                    shapeFactors.sq,
+                    depthFactors.dq,
+                    inclinationFactors.iq,
+                    unitWeight,
+                    bearingCapacityFactors.Ny,
+                    shapeFactors.sy,
+                    depthFactors.dy,
+                    inclinationFactors.iq,
+                    waterTableFactor,
+                    Df,
+                    "meyerhoff"
+                  ) /
+                    3 +
+                    overBurdenPressure,
+                  3
                 )}
               </td>
             </tr>
