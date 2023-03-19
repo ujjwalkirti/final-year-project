@@ -38,9 +38,9 @@ function calculateNetBearingCapacity(
       (0.5 * 200 * y * Ny * sy * dy * iy * W) / 1000
     );
   } else if (methodOfCalculation === "terzaghi") {
-    return 1.3 * c * Nc + y * Df * Nq + 0.4 * y * 200 * Ny;
+    return 1.3 * c * Nc + (y * Df * Nq) / 1000 + (0.4 * y * 200 * Ny) / 1000;
   } else {
-    return 0;
+    return c * Nc + (y * Df * Nq) / 1000 + (0.5 * y * 200 * Ny) / 1000;
   }
 }
 
@@ -224,7 +224,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
             <input
               type={`text`}
               required
-              value={inclinationToVertical}
+              // value={inclinationToVertical}
               onChange={(e) => {
                 setInclinationToVertical(
                   degreeToRadians(parseFloat(e.target.value))
@@ -658,7 +658,9 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                   shapeFactors.sy,
                   depthFactors.dy,
                   inclinationFactors.iq,
-                  waterTableFactor
+                  waterTableFactor,
+                  Df,
+                  "iscode"
                 ) /
                   FOS +
                   " Kg/cm^2"}
@@ -684,7 +686,9 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                     shapeFactors.sy,
                     depthFactors.dy,
                     inclinationFactors.iq,
-                    waterTableFactor
+                    waterTableFactor,
+                    Df,
+                    "iscode"
                   ) /
                     3 +
                     overBurdenPressure +
