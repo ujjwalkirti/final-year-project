@@ -737,7 +737,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                   shapeFactors.sq,
                   depthFactors.dq,
                   inclinationFactors.iq,
-                  unitWeight,
+                  submergedUnitWeight,
                   bearingCapacityFactors.Ny,
                   shapeFactors.sy,
                   depthFactors.dy,
@@ -745,7 +745,9 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                   waterTableFactor,
                   Df,
                   "iscode"
-                )}
+                ) /
+                  3 +
+                  overBurdenPressure}
               </td>
               <td>
                 {calculateNetBearingCapacity(

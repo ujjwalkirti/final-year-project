@@ -21,3 +21,8 @@
   background-color: white;
   color: #ffacac;
 }
+@media only screen and (max-width: 870px) {
+  .parent-wrapper-data-collection {
+    width: 90%;
+  }
+}
