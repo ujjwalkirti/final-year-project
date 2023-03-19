@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { factorsOfSafety, ISCodeValues } from "../data";
+import {
+  factorsOfSafety,
+  ISCodeValues,
+  meyerHoffValues,
+  terzaghiValues,
+} from "../data";
 import "./LevelDataCollection.css";
 
 function degreeToRadians(degree) {
@@ -22,13 +27,21 @@ function calculateNetBearingCapacity(
   sy,
   dy,
   iy,
-  W
+  W,
+  Df,
+  methodOfCalculation
 ) {
-  return (
-    c * Nc * sc * ic * dc +
-    q * (Nq - 1) * sq * dq * iq +
-    (0.5 * 200 * y * Ny * sy * dy * iy * W) / 1000
-  );
+  if (methodOfCalculation === "iscode") {
+    return (
+      c * Nc * sc * ic * dc +
+      q * (Nq - 1) * sq * dq * iq +
+      (0.5 * 200 * y * Ny * sy * dy * iy * W) / 1000
+    );
+  } else if (methodOfCalculation === "terzaghi") {
+    return 1.3 * c * Nc + y * Df * Nq + 0.4 * y * 200 * Ny;
+  } else {
+    return 0;
+  }
 }
 
 function interpolateValues(
@@ -45,40 +58,59 @@ function interpolateValues(
   );
 }
 
-function calculateBearingCapacityFactors(phi) {
+function calculateBearingCapacityFactors(phi, typeOfCalculation) {
   let upperbound = 0;
   let lowerbound = 0;
   let multipleOfTen = parseInt(phi / 10, 10);
   lowerbound = multipleOfTen * 10;
   upperbound = lowerbound + 5;
-  const lowerValues = ISCodeValues.get(lowerbound);
-  const higherValues = ISCodeValues.get(upperbound);
-  // console.log(lowerValues, higherValues, phi, multipleOfTen);
-  const Nc = interpolateValues(
-    upperbound,
-    lowerbound,
-    phi,
-    higherValues.Nc,
-    lowerValues.Nc
-  );
-  const Nq = interpolateValues(
-    upperbound,
-    lowerbound,
-    phi,
-    higherValues.Nq,
-    lowerValues.Nq
-  );
-  const Ny = interpolateValues(
-    upperbound,
-    lowerbound,
-    phi,
-    higherValues.Ny,
-    lowerValues.Ny
-  );
-  return { Nc, Nq, Ny };
+  if (
+    upperbound % 5 === 0 &&
+    lowerbound % 5 === 0 &&
+    lowerbound <= 50 &&
+    upperbound <= 50
+  ) {
+    let lowerValues = { Nc: 0, Nq: 0, Ny: 0 };
+    let higherValues = { Nc: 0, Nq: 0, Ny: 0 };
+    if (typeOfCalculation === "iscode") {
+      lowerValues = ISCodeValues.get(lowerbound);
+      higherValues = ISCodeValues.get(upperbound);
+    } else if (typeOfCalculation === "terzaghi") {
+      lowerValues = terzaghiValues.get(lowerbound);
+      higherValues = terzaghiValues.get(upperbound);
+    } else {
+      lowerValues = meyerHoffValues.get(lowerbound);
+      higherValues = meyerHoffValues.get(upperbound);
+    }
+    // console.log(lowerValues, higherValues, phi, multipleOfTen);
+    const Nc = interpolateValues(
+      upperbound,
+      lowerbound,
+      phi,
+      higherValues.Nc,
+      lowerValues.Nc
+    );
+    const Nq = interpolateValues(
+      upperbound,
+      lowerbound,
+      phi,
+      higherValues.Nq,
+      lowerValues.Nq
+    );
+    const Ny = interpolateValues(
+      upperbound,
+      lowerbound,
+      phi,
+      higherValues.Ny,
+      lowerValues.Ny
+    );
+    return { Nc, Nq, Ny };
+  } else {
+    return { Nc: 0, Nq: 0, Ny: 0 };
+  }
 }
 
-const LevelDataCollector = ({ BoreLogNumber }) => {
+const LevelDataCollector = ({ location, BoreLogNumber }) => {
   const [Df, setDf] = useState(0);
   const [inclinationToVertical, setInclinationToVertical] = useState(0);
   const [spt, setSpt] = useState(0);
@@ -94,13 +126,12 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
   const [NValue, setNValue] = useState(0);
   const [phi, setPhi] = useState(0);
   const [cohesion, setCohesion] = useState(0);
-  const [Dw, setDw] = useState(1);
   const [FOS, setFOS] = useState(factorsOfSafety.get("sandy"));
   const [Nphi, setNphi] = useState(
     Math.pow(Math.tan(Math.PI / 4 + degreeToRadians(phi) / 2), 2)
   );
   const [bearingCapacityFactors, setBearingCapacityFactors] = useState(
-    calculateBearingCapacityFactors(phi)
+    calculateBearingCapacityFactors(phi, "iscode")
   );
 
   const [shapeFactors, setShapeFactors] = useState({
@@ -127,14 +158,22 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
     e.preventDefault();
   };
   const [changedOnce, setChangedOnce] = useState(false);
+  const [terzaghiFactors, setTerzaghiFactors] = useState(
+    calculateBearingCapacityFactors(phi, "terzaghi")
+  );
+  const [meyerHoffFactors, setMeyerHoffFactors] = useState(
+    calculateBearingCapacityFactors(phi, "meyerhoff")
+  );
 
   useEffect(() => {
     if (changedOnce) {
       setSubmergedUnitWeight((0.981 * (specificGravity - 1)) / (1 + voidRatio));
       setOverBurdenPressure((submergedUnitWeight * Df) / 1000);
       setNphi(Math.pow(Math.tan(Math.PI / 4 + degreeToRadians(phi) / 2), 2));
-      setBearingCapacityFactors(calculateBearingCapacityFactors(phi));
-      console.log(bearingCapacityFactors);
+      setBearingCapacityFactors(calculateBearingCapacityFactors(phi, "iscode"));
+      setTerzaghiFactors(calculateBearingCapacityFactors(phi, "terzaghi"));
+      setMeyerHoffFactors(calculateBearingCapacityFactors(phi, "meyerhoff"));
+      // console.log(bearingCapacityFactors);
       setDepthFactors({
         dc: 1 + 0.2 * (Df / 200) * Math.sqrt(Nphi),
         dq: phi < 10 ? 1 : 1 + 0.1 * (Df / 200) * Math.sqrt(Nphi),
@@ -164,8 +203,11 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
     <div className="parent">
       <form onSubmit={handleSubmit}>
         <div className="site-info">
-          <p className="info-title">Site Information</p>
-          <span>Bore log: {BoreLogNumber}</span>
+          <p className="info-title" style={{ fontSize: "25px" }}>
+            {location} - Site Information
+          </p>
+          <p className="info-title">Using IS:6403, 1981 Code Methdod</p>
+          {/* <span>Bore log: {BoreLogNumber}</span> */}
           <span>
             D<sub>f</sub>:
             <input
@@ -541,7 +583,9 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
                 shapeFactors.sy,
                 depthFactors.dy,
                 inclinationFactors.iq,
-                waterTableFactor
+                waterTableFactor,
+                Df,
+                "iscode"
               )
             )
               ? ""
@@ -562,7 +606,9 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
                   shapeFactors.sy,
                   depthFactors.dy,
                   inclinationFactors.iq,
-                  waterTableFactor
+                  waterTableFactor,
+                  Df,
+                  "iscode"
                 ) +
                 " Kg/cm^2"}
           </p>
@@ -584,7 +630,9 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
             shapeFactors.sy,
             depthFactors.dy,
             inclinationFactors.iq,
-            waterTableFactor
+            waterTableFactor,
+            Df,
+            "iscode"
           )
         ) ? (
           ""
@@ -647,6 +695,102 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
           </div>
         )}
       </form>
+      <div className="site-info">
+        <p
+          style={{
+            fontSize: "20px",
+            textDecoration: "underline",
+            textAlign: "center",
+            marginTop: "10px",
+          }}
+        >
+          Comparison between values calculated using IS Code, Terzaghi and
+          MeyerHoff's methods.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>C</th>
+              <th>Φ</th>
+              <th>IS Code</th>
+              <th>Terzaghi's</th>
+              <th>MeyerHoff's</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{cohesion}</td>
+              <td>{phi}</td>
+              <td>
+                {calculateNetBearingCapacity(
+                  cohesion,
+                  bearingCapacityFactors.Nc,
+                  shapeFactors.sc,
+                  inclinationFactors.ic,
+                  depthFactors.dc,
+                  overBurdenPressure,
+                  bearingCapacityFactors.Nq,
+                  shapeFactors.sq,
+                  depthFactors.dq,
+                  inclinationFactors.iq,
+                  unitWeight,
+                  bearingCapacityFactors.Ny,
+                  shapeFactors.sy,
+                  depthFactors.dy,
+                  inclinationFactors.iq,
+                  waterTableFactor,
+                  Df,
+                  "iscode"
+                )}
+              </td>
+              <td>
+                {calculateNetBearingCapacity(
+                  cohesion,
+                  bearingCapacityFactors.Nc,
+                  shapeFactors.sc,
+                  inclinationFactors.ic,
+                  depthFactors.dc,
+                  overBurdenPressure,
+                  bearingCapacityFactors.Nq,
+                  shapeFactors.sq,
+                  depthFactors.dq,
+                  inclinationFactors.iq,
+                  unitWeight,
+                  bearingCapacityFactors.Ny,
+                  shapeFactors.sy,
+                  depthFactors.dy,
+                  inclinationFactors.iq,
+                  waterTableFactor,
+                  Df,
+                  "terzaghi"
+                )}
+              </td>
+              <td>
+                {calculateNetBearingCapacity(
+                  cohesion,
+                  bearingCapacityFactors.Nc,
+                  shapeFactors.sc,
+                  inclinationFactors.ic,
+                  depthFactors.dc,
+                  overBurdenPressure,
+                  bearingCapacityFactors.Nq,
+                  shapeFactors.sq,
+                  depthFactors.dq,
+                  inclinationFactors.iq,
+                  unitWeight,
+                  bearingCapacityFactors.Ny,
+                  shapeFactors.sy,
+                  depthFactors.dy,
+                  inclinationFactors.iq,
+                  waterTableFactor,
+                  Df,
+                  "meyerhoff"
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

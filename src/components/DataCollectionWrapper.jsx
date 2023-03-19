@@ -4,17 +4,19 @@ import React, { useState } from "react";
 import "./DataCollectionWrapper.css";
 import LevelDataCollector from "./LevelDataCollector";
 
-const DataCollectionWrapper = ({ level }) => {
+const DataCollectionWrapper = ({ location, level }) => {
   function printDocument() {
     const pdfHolder = document.getElementById("pdfHolder" + level);
-    html2canvas(document.getElementById("divToPrint")).then((canvas) => {
-      pdfHolder.appendChild(canvas);
-    });
+    html2canvas(document.getElementById("divToPrint" + level)).then(
+      (canvas) => {
+        pdfHolder.appendChild(canvas);
+      }
+    );
   }
   return (
     <div className="parent-wrapper-data-collection">
-      <div id="divToPrint">
-        <LevelDataCollector BoreLogNumber={level} />
+      <div id={"divToPrint" + level}>
+        <LevelDataCollector location={location} BoreLogNumber={level} />
       </div>
       <button
         type={`submit`}
@@ -22,7 +24,7 @@ const DataCollectionWrapper = ({ level }) => {
         onClick={printDocument}
         // disabled
       >
-        Generate report
+        Generate Report
       </button>
       <div id={"pdfHolder" + level}></div>
     </div>

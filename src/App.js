@@ -5,6 +5,7 @@ import Heading from "./components/Heading";
 
 function App() {
   const [levels, setLevels] = useState(1);
+  const [location, setLocation] = useState("");
   // useEffect(() => {
   //   console.log(typeof levels);
   // }, [levels]);
@@ -12,31 +13,50 @@ function App() {
     <div className="App">
       <Heading />
       <div className="levels">
-        <p className="levels-text">Enter the number of levels:</p>
+        <label htmlFor="location-name">Enter the name for location</label>
         <input
+          type={`text`}
+          value={location}
+          required
           className="levels-input"
-          value={levels}
-          type="number"
+          id="location-name"
           onChange={(e) => {
-            let set_level = parseInt(e.target.value, 10);
-            if (set_level > 0) {
-              setLevels(set_level);
-            } else {
-              alert("Be careful about what are you entering!");
-            }
+            setLocation(e.target.value);
           }}
         />
       </div>
-      <div>
-        {[...Array(levels)].map((e, i) => {
-          return (
-            <section className="level-container" key={i}>
-              <p className="level-sign">Level {i + 1}</p>
-              <DataCollectionWrapper level={i+1} />
-            </section>
-          );
-        })}
-      </div>
+      {location.length !== 0 && (
+        <>
+          <div className="levels">
+            <p className="levels-text">Enter the number of levels:</p>
+
+            <input
+              className="levels-input"
+              value={levels}
+              type="number"
+              onChange={(e) => {
+                let set_level = parseInt(e.target.value, 10);
+                if (set_level > 0) {
+                  setLevels(set_level);
+                } else {
+                  alert("Be careful about what are you entering!");
+                }
+              }}
+            />
+          </div>
+          <div>
+            {[...Array(levels)].map((e, i) => {
+              return (
+                <section className="level-container" key={i}>
+                  <hr />
+                  <p className="level-sign">Level {i + 1}</p>
+                  <DataCollectionWrapper location={location} level={i + 1} />
+                </section>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
