@@ -6,8 +6,76 @@ function degreeToRadians(degree) {
   return (degree * Math.PI) / 180;
 }
 
-function calculateNetBearingCapacity(q, Nq, sq, dq, iq, y, Ny, sy, dy, iy, W) {
-  return q * (Nq - 1) * sq * dq * iq + 0.5 * 200 * y * Ny * sy * dy * iy * W;
+function calculateNetBearingCapacity(
+  c,
+  Nc,
+  sc,
+  ic,
+  dc,
+  q,
+  Nq,
+  sq,
+  dq,
+  iq,
+  y,
+  Ny,
+  sy,
+  dy,
+  iy,
+  W
+) {
+  return (
+    c * Nc * sc * ic * dc +
+    q * (Nq - 1) * sq * dq * iq +
+    0.5 * 200 * y * Ny * sy * dy * iy * W
+  );
+}
+
+function interpolateValues(
+  upperbound,
+  lowerbound,
+  phi,
+  upperValues,
+  lowerValues
+) {
+  return (
+    ((upperValues - lowerValues) * (phi - lowerbound)) /
+      (upperbound - lowerbound) +
+    lowerValues
+  );
+}
+
+function calculateBearingCapacityFactors(phi) {
+  let upperbound = 0;
+  let lowerbound = 0;
+  let multipleOfTen = phi / 10;
+  lowerbound = multipleOfTen * 10;
+  upperbound = (multipleOfTen + 1) * 10;
+  const lowerValues = ISCodeValues.get(lowerbound);
+  const higherValues = ISCodeValues.get(upperbound);
+  console.log(lowerValues, higherValues);
+  const Nc = interpolateValues(
+    upperbound,
+    lowerbound,
+    phi,
+    higherValues.Nc,
+    lowerValues.Nc
+  );
+  const Nq = interpolateValues(
+    upperbound,
+    lowerbound,
+    phi,
+    higherValues.Nq,
+    lowerValues.Nq
+  );
+  const Ny = interpolateValues(
+    upperbound,
+    lowerbound,
+    phi,
+    higherValues.Ny,
+    lowerValues.Ny
+  );
+  return [{ Nc, Nq, Ny }];
 }
 
 const LevelDataCollector = ({ BoreLogNumber }) => {
@@ -25,13 +93,14 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
   );
   const [NValue, setNValue] = useState(0);
   const [phi, setPhi] = useState(0);
+  const [cohesion, setCohesion] = useState(0);
   const [Dw, setDw] = useState(1);
   const [FOS, setFOS] = useState(0);
   const [Nphi, setNphi] = useState(
     Math.pow(Math.tan(Math.PI / 4 + phi / 2), 2)
   );
   const [bearingCapacityFactors, setBearingCapacityFactors] = useState(
-    ISCodeValues.get(phi)
+    calculateBearingCapacityFactors(phi)
   );
 
   const [shapeFactors, setShapeFactors] = useState({
@@ -156,6 +225,17 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               // value={phi}
               placeholder="Enter the value in degrees"
               onChange={(e) => setPhi(degreeToRadians(e.target.value))}
+            />
+          </span>
+          <span>
+            C (Cohesion):
+            <input
+              type={`number`}
+              required
+              placeholder="Please enter the unit as Kg/cm^2"
+              onChange={(e) => {
+                setCohesion(e.target.value);
+              }}
             />
           </span>
         </div>
@@ -436,6 +516,11 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
             <sup>'</sup>{" "}
             {isNaN(
               calculateNetBearingCapacity(
+                cohesion,
+                bearingCapacityFactors.Nc,
+                shapeFactors.sc,
+                inclinationFactors.ic,
+                depthFactors.dc,
                 overBurdenPressure,
                 bearingCapacityFactors.Nq,
                 shapeFactors.sq,
@@ -452,6 +537,11 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               ? ""
               : "= " +
                 calculateNetBearingCapacity(
+                  cohesion,
+                  bearingCapacityFactors.Nc,
+                  shapeFactors.sc,
+                  inclinationFactors.ic,
+                  depthFactors.dc,
                   overBurdenPressure,
                   bearingCapacityFactors.Nq,
                   shapeFactors.sq,
@@ -469,6 +559,11 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
         </div>
         {isNaN(
           calculateNetBearingCapacity(
+            cohesion,
+            bearingCapacityFactors.Nc,
+            shapeFactors.sc,
+            inclinationFactors.ic,
+            depthFactors.dc,
             overBurdenPressure,
             bearingCapacityFactors.Nq,
             shapeFactors.sq,
@@ -488,6 +583,11 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
             <div>
               Net Safe Bearing Capacity (NSBC) : q<sub>d</sub>/3 ={" "}
               {calculateNetBearingCapacity(
+                cohesion,
+                bearingCapacityFactors.Nc,
+                shapeFactors.sc,
+                inclinationFactors.ic,
+                depthFactors.dc,
                 overBurdenPressure,
                 bearingCapacityFactors.Nq,
                 shapeFactors.sq,
@@ -507,6 +607,11 @@ const LevelDataCollector = ({ BoreLogNumber }) => {
               <p>
                 Safe Bearing Capacity (SBC) : NSBC + q ={" "}
                 {calculateNetBearingCapacity(
+                  cohesion,
+                  bearingCapacityFactors.Nc,
+                  shapeFactors.sc,
+                  inclinationFactors.ic,
+                  depthFactors.dc,
                   overBurdenPressure,
                   bearingCapacityFactors.Nq,
                   shapeFactors.sq,
