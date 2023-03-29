@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .parent-wrapper-data-collection {
   display: flex;
   flex-direction: column;
@@ -26,3 +27,33 @@
     width: 90%;
   }
 }
+=======
+.parent-wrapper-data-collection {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin: auto;
+}
+.generate-report {
+  cursor: pointer;
+  width: 200px;
+  margin: 20px auto;
+  background-color: #ffacac;
+  /* border: none; */
+  color: white;
+  padding: 5px;
+  font-size: 20px;
+  border: 1px solid #ffacac;
+  border-radius: 10px;
+}
+
+.generate-report:hover {
+  background-color: white;
+  color: #ffacac;
+}
+@media only screen and (max-width: 870px) {
+  .parent-wrapper-data-collection {
+    width: 90%;
+  }
+}
+>>>>>>> d38ae50f52e7ca50723c788fed77a2683e026ebf
