@@ -222,7 +222,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
     <div className="parent">
       <form onSubmit={handleSubmit}>
         <div className="site-info">
-          <p className="info-title" style={{ fontSize: "25px" }}>
+          <p className="info-title">
             {location} - Site Information
           </p>
           <p className="info-title">Using IS:6403, 1981 Code Methdod</p>
@@ -727,7 +727,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
       <div className="site-info">
         <p
           style={{
-            fontSize: "20px",
+            // fontSize: "20px",
             textDecoration: "underline",
             textAlign: "center",
             marginTop: "10px",

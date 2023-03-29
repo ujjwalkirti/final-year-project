@@ -6,12 +6,35 @@ import Heading from "./components/Heading";
 function App() {
   const [levels, setLevels] = useState(1);
   const [location, setLocation] = useState("");
+  const [appendix, setAppendix] = useState(0);
   // useEffect(() => {
   //   console.log(typeof levels);
   // }, [levels]);
   return (
     <div className="App">
+      {appendix !== 0 && (
+        <div className="appendix">
+          <p>Annexure: {appendix}</p>
+          <p>Site details: {location}</p>
+        </div>
+      )}
       <Heading />
+      <div className="levels">
+        <label htmlFor="Appendix-number">Enter Annexure No.</label>
+        <input
+          type={`number`}
+          value={appendix}
+          required
+          className="levels-input"
+          id="Appendix-number"
+          onChange={(e) => {
+            const annexure_value = e.target.value;
+            if (annexure_value > 0) {
+              setAppendix(annexure_value);
+            }
+          }}
+        />
+      </div>
       <div className="levels">
         <label htmlFor="location-name">Enter the name for location</label>
         <input
@@ -47,7 +70,11 @@ function App() {
           <div>
             {[...Array(levels)].map((e, i) => {
               return (
-                <section className="level-container" key={i}>
+                <section
+                  className="level-container"
+                  style={{ fontSize: "16px" }}
+                  key={i}
+                >
                   <hr />
                   <p className="level-sign">Level {i + 1}</p>
                   <DataCollectionWrapper location={location} level={i + 1} />
