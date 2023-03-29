@@ -1,6 +1,8 @@
 .heading-parent {
   display: flex;
   flex-direction: column;
+  margin-top: 96px;
+  margin-bottom: ;
 }
 .heading-title {
   color: red;
