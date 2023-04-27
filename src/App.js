@@ -18,7 +18,7 @@ function App() {
           <p>Site details: {location}</p>
         </div>
       )}
-      <Heading />
+      {/* <Heading /> */}
       <div className="levels">
         <label htmlFor="Appendix-number">Enter Annexure No.</label>
         <input

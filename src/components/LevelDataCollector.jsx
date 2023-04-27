@@ -137,7 +137,9 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
   const [specificGravity, setSpecificGravity] = useState(0);
   const [voidRatio, setVoidRatio] = useState(0);
   const [submergedUnitWeight, setSubmergedUnitWeight] = useState(
-    (0.981 * (specificGravity - 1)) / (1 + voidRatio)
+    specificGravity !== 0
+      ? roundTo((0.981 * (specificGravity - 1)) / (1 + voidRatio), 3)
+      : 0
   );
   const [overBurdenPressure, setOverBurdenPressure] = useState(
     (submergedUnitWeight * Df) / 1000
@@ -186,7 +188,11 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
 
   useEffect(() => {
     if (changedOnce) {
-      setSubmergedUnitWeight((0.981 * (specificGravity - 1)) / (1 + voidRatio));
+      setSubmergedUnitWeight(
+        specificGravity !== 0
+          ? roundTo((0.981 * (specificGravity - 1)) / (1 + voidRatio), 3)
+          : 0
+      );
       setOverBurdenPressure((submergedUnitWeight * Df) / 1000);
       setNphi(Math.pow(Math.tan(Math.PI / 4 + degreeToRadians(phi) / 2), 2));
       setBearingCapacityFactors(calculateBearingCapacityFactors(phi, "iscode"));
@@ -222,9 +228,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
     <div className="parent">
       <form onSubmit={handleSubmit}>
         <div className="site-info">
-          <p className="info-title">
-            {location} - Site Information
-          </p>
+          <p className="info-title">{location} - Site Information</p>
           <p className="info-title">Using IS:6403, 1981 Code Methdod</p>
           {/* <span>Bore log: {BoreLogNumber}</span> */}
           <span>
@@ -241,7 +245,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
           <span>
             α (Inclination of a load to the vertical) :{" "}
             <input
-              type={`text`}
+              type={`number`}
               required
               // value={inclinationToVertical}
               onChange={(e) => {
@@ -301,7 +305,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
           </span>
           <span className="">
             γ<sup>'</sup> (submerged unit weight of soil) = γ<sub>w</sub>
-            *(G-1)/(1+e) = {submergedUnitWeight}
+            *(G-1)/(1+e) = {submergedUnitWeight} Kg/m<sup>3</sup>
           </span>
           <span>
             Overburden Pressure (q) : (γ<sup>'</sup>*D)/1000 ={" "}
@@ -390,37 +394,6 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
         </div>
         {/* add div for calculating Nc,Nq and Ny */}
         <div className="site-info">
-          <table>
-            <thead>
-              <tr>
-                <th>Φ</th>
-                <th>
-                  N<sub>c</sub>
-                </th>
-                <th>
-                  N<sub>q</sub>
-                </th>
-                <th>
-                  N<sub>γ</sub>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...ISCodeValues.keys()].map((value, index) => {
-                // console.log(value);
-                return (
-                  <tr key={index}>
-                    <td>{value}</td>
-                    <td>{ISCodeValues.get(value).Nc}</td>
-                    <td>{ISCodeValues.get(value).Nq}</td>
-                    <td>{ISCodeValues.get(value).Ny}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          Using the above table, we can calculate the values:
-          <br />
           <span className="shear-params">
             &emsp; N<sub>c</sub> = {bearingCapacityFactors.Nc}
             <br />
