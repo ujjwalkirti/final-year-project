@@ -57,7 +57,7 @@ function calculateNetBearingCapacity(
       (0.5 * 200 * y * Ny * sy * dy * iy * W) / 1000
     );
   } else if (methodOfCalculation === "terzaghi") {
-    return 1.3 * c * Nc + (y * Df * Nq) / 1000 + (0.4 * y * 200 * Ny) / 1000;
+    return 1.2 * c * Nc + (y * Df * Nq) / 1000 + (0.4 * y * 200 * Ny) / 1000;
   } else {
     return c * Nc + (y * Df * Nq) / 1000 + (0.5 * y * 200 * Ny) / 1000;
   }
