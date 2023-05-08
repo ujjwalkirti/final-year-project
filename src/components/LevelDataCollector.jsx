@@ -238,8 +238,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               required
               value={Df}
               onChange={(e) => {
-                isNaN(parseFloat(e.target.value)) &&
-                  setDf(parseFloat(e.target.value));
+                setDf(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -250,10 +249,9 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               required
               // value={inclinationToVertical}
               onChange={(e) => {
-                isNaN(parseFloat(e.target.value)) &&
-                  setInclinationToVertical(
-                    degreeToRadians(parseFloat(e.target.value))
-                  );
+                setInclinationToVertical(
+                  degreeToRadians(parseFloat(e.target.value))
+                );
               }}
             />
           </span>
@@ -266,8 +264,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               required
               value={spt}
               onChange={(e) => {
-                isNaN(parseFloat(e.target.value)) &&
-                  setSpt(parseFloat(e.target.value));
+                setSpt(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -279,8 +276,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               required
               placeholder="Please enter the value in Kg/cm^2"
               onChange={(e) => {
-                isNaN(parseFloat(e.target.value)) &&
-                  setUnitWeight(parseFloat(e.target.value));
+                setUnitWeight(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -291,8 +287,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               required
               value={specificGravity}
               onChange={(e) => {
-                isNaN(parseFloat(e.target.value)) &&
-                  setSpecificGravity(parseFloat(e.target.value));
+                setSpecificGravity(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -304,8 +299,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               value={voidRatio}
               onChange={(e) => {
                 // console.log(voidRatio);
-                isNaN(parseFloat(e.target.value)) &&
-                  setVoidRatio(parseFloat(e.target.value));
+                setVoidRatio(parseFloat(e.target.value));
               }}
             />
           </span>
@@ -323,10 +317,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               type={`number`}
               required
               value={NValue}
-              onChange={(e) =>
-                isNaN(parseFloat(e.target.value)) &&
-                setNValue(parseFloat(e.target.value))
-              }
+              onChange={(e) => setNValue(parseFloat(e.target.value))}
             />
           </span>
           <span>
@@ -336,10 +327,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               required
               value={phi}
               placeholder="Enter the value in degrees"
-              onChange={(e) =>
-                isNaN(parseFloat(e.target.value)) &&
-                setPhi(parseInt(e.target.value))
-              }
+              onChange={(e) => setPhi(parseInt(e.target.value))}
             />
           </span>
           <span>
@@ -349,8 +337,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               required
               placeholder="Please enter the unit as Kg/cm^2"
               onChange={(e) => {
-                isNaN(parseFloat(e.target.value)) &&
-                  setCohesion(parseFloat(e.target.value));
+                setCohesion(parseFloat(e.target.value));
               }}
             />
           </span>
