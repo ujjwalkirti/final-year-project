@@ -18,7 +18,7 @@ form {
 .site-info span input {
   padding: 6px 12px;
   margin: 5px;
-  width: 50%;
+  width: 200px;
 }
 
 .site-fos-selection {
@@ -41,7 +41,8 @@ table {
   margin: auto;
 }
 td {
-  border: 1px solid black;
+  border-left: 1px solid black;
+  border-top: 1px solid black;
   width: 25%;
   text-align: center;
 }
@@ -120,4 +121,3 @@ td {
   width: auto;
   padding: 5px 10px;
 }
-  

@@ -14,7 +14,7 @@ function App() {
     <div className="App">
       {appendix !== 0 && (
         <div className="appendix">
-          <p>Annexure: {appendix}</p>
+          <p>Annexure: A{appendix}</p>
           <p>Site details: {location}</p>
         </div>
       )}
