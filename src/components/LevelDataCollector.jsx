@@ -31,6 +31,8 @@ function roundTo(n, digits) {
 }
 
 function calculateNetBearingCapacity(
+  phi,
+  inclinationToVertical,
   c,
   Nc,
   sc,
@@ -57,9 +59,50 @@ function calculateNetBearingCapacity(
       (0.5 * 200 * y * Ny * sy * dy * iy * W) / 1000
     );
   } else if (methodOfCalculation === "terzaghi") {
-    return 1.2 * c * Nc + (y * Df * Nq) / 1000 + (0.4 * y * 200 * Ny) / 1000;
+    return 1.3 * c * Nc + (y * Df * Nq) / 1000 + (0.4 * y * 200 * Ny) / 1000;
   } else {
-    return c * Nc + (y * Df * Nq) / 1000 + (0.5 * y * 200 * Ny) / 1000;
+    // recalculating bearing capacity factors for MeyerHoff's method
+    let Nphi = Math.pow(Math.tan(Math.PI / 4 + degreeToRadians(phi) / 2), 2);
+    Nq = Nphi * Math.pow(2.71, Math.PI * Math.tan(degreeToRadians(phi)));
+    Nc = (1 / Math.tan(degreeToRadians(phi))) * (Nq - 1);
+    Ny = [Math.tan(1.4 * degreeToRadians(phi))] * (Nq - 1);
+    // Shape factors for the MeyerHoff's method
+    sc = 1 + 0.2 * Nphi;
+    if (phi === 0) {
+      sq = sy = 1;
+    } else if (phi >= 10) {
+      sq = sy = 1 + 0.1 * Nphi;
+    }
+    // Depth factors
+    dc = 1 + 0.2 * ((Df / 200) * Math.pow(Nphi, 1 / 2));
+    if (phi == 0) {
+      dq = dy = 1;
+    } else if (phi > 10) {
+      dq = dy = 1 + 0.1 * (Df / 200) * Math.pow(Nphi, 1 / 2);
+    }
+    //inclination factor
+    ic = iq = 1 - inclinationToVertical / 90;
+    iy = Math.pow(1 - inclinationToVertical / phi, 2);
+    console.log(
+      [sc, sq, sy],
+      [dc, dq, dy],
+      [ic, iq, iy],
+      [Nc, Nq, Ny],
+      { c: c },
+      { Df: Df },
+      { y: y },
+      {
+        bearing_capacity:
+          c * Nc * sc * dc * ic +
+          (y * Df * Nq * sq * dq * iq) / 1000 +
+          (0.5 * y * 200 * Ny * sy * dy * iy) / 1000,
+      }
+    );
+    return (
+      c * Nc * sc * dc * ic +
+      (y * Df * Nq * sq * dq * iq) / 1000 +
+      (0.5 * y * 200 * Ny * sy * dy * iy) / 1000
+    );
   }
 }
 
@@ -274,7 +317,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
             <input
               type={`number`}
               required
-              placeholder="Please enter the value in Kg/cm^2"
+              placeholder="Please enter the value in g/cm^3"
               onChange={(e) => {
                 setUnitWeight(parseFloat(e.target.value));
               }}
@@ -560,6 +603,8 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
             <sup>'</sup>{" "}
             {isNaN(
               calculateNetBearingCapacity(
+                phi,
+                inclinationToVertical,
                 cohesion,
                 bearingCapacityFactors.Nc,
                 shapeFactors.sc,
@@ -584,6 +629,8 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               : "= " +
                 roundTo(
                   calculateNetBearingCapacity(
+                    phi,
+                    inclinationToVertical,
                     cohesion,
                     bearingCapacityFactors.Nc,
                     shapeFactors.sc,
@@ -610,6 +657,8 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
         </div>
         {isNaN(
           calculateNetBearingCapacity(
+            phi,
+            inclinationToVertical,
             cohesion,
             bearingCapacityFactors.Nc,
             shapeFactors.sc,
@@ -639,6 +688,8 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               <strong>
                 {roundTo(
                   (calculateNetBearingCapacity(
+                    phi,
+                    inclinationToVertical,
                     cohesion,
                     bearingCapacityFactors.Nc,
                     shapeFactors.sc,
@@ -671,6 +722,8 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                 <strong>
                   {roundTo(
                     (calculateNetBearingCapacity(
+                      phi,
+                      inclinationToVertical,
                       cohesion,
                       bearingCapacityFactors.Nc,
                       shapeFactors.sc,
@@ -731,6 +784,8 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               <td>
                 {roundTo(
                   (calculateNetBearingCapacity(
+                    phi,
+                    inclinationToVertical,
                     cohesion,
                     bearingCapacityFactors.Nc,
                     shapeFactors.sc,
@@ -760,6 +815,8 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               <td>
                 {roundTo(
                   (calculateNetBearingCapacity(
+                    phi,
+                    inclinationToVertical,
                     cohesion,
                     bearingCapacityFactors.Nc,
                     shapeFactors.sc,
@@ -789,6 +846,8 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               <td>
                 {roundTo(
                   (calculateNetBearingCapacity(
+                    phi,
+                    inclinationToVertical,
                     cohesion,
                     bearingCapacityFactors.Nc,
                     shapeFactors.sc,
