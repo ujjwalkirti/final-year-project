@@ -56,53 +56,59 @@ function calculateNetBearingCapacity(
     return (
       c * Nc * sc * ic * dc +
       q * (Nq - 1) * sq * dq * iq +
-      (0.5 * 200 * y * Ny * sy * dy * iy * W) / 1000
+      0.5 * 2 * y * Ny * sy * dy * iy * W
     );
   } else if (methodOfCalculation === "terzaghi") {
-    return 1.3 * c * Nc + (y * Df * Nq) / 1000 + (0.4 * y * 200 * Ny) / 1000;
+    console.log(
+      // [sc, sq, sy],
+      // [dc, dq, dy],
+      // [ic, iq, iy],
+      [Nc, Nq, Ny]
+      // { c: c },
+      // { Df: Df },
+      // { y: y }
+    );
+    return 1.3 * c * Nc + y * Df * Nq + 0.4 * 2 * y * Ny;
   } else {
     // recalculating bearing capacity factors for MeyerHoff's method
-    let Nphi = Math.pow(Math.tan(Math.PI / 4 + degreeToRadians(phi) / 2), 2);
-    Nq = Nphi * Math.pow(2.71, Math.PI * Math.tan(degreeToRadians(phi)));
-    Nc = (1 / Math.tan(degreeToRadians(phi))) * (Nq - 1);
-    Ny = [Math.tan(1.4 * degreeToRadians(phi))] * (Nq - 1);
+    // let Nphi = Math.pow(Math.tan(Math.PI / 4 + degreeToRadians(phi) / 2), 2);
+    // Nq = Nphi * Math.pow(2.71, Math.PI * Math.tan(degreeToRadians(phi)));
+    // Nc = (1 / Math.tan(degreeToRadians(phi))) * (Nq - 1);
+    // Ny = [Math.tan(degreeToRadians(1.4 * phi))] * (Nq - 1);
     // Shape factors for the MeyerHoff's method
-    sc = 1 + 0.2 * Nphi;
-    if (phi === 0) {
-      sq = sy = 1;
-    } else if (phi >= 10) {
-      sq = sy = 1 + 0.1 * Nphi;
-    }
+    // sc = 1 + 0.2 * Nphi;
+    // if (phi === 0) {
+    //   sq = sy = 1;
+    // } else if (phi >= 10) {
+    //   sq = sy = 1 + 0.1 * Nphi;
+    // }
     // Depth factors
-    dc = 1 + 0.2 * ((Df / 200) * Math.pow(Nphi, 1 / 2));
-    if (phi == 0) {
-      dq = dy = 1;
-    } else if (phi > 10) {
-      dq = dy = 1 + 0.1 * (Df / 200) * Math.pow(Nphi, 1 / 2);
-    }
+    // dc = 1 + 0.2 * ((Df / 2) * Math.pow(Nphi, 1 / 2));
+    // if (phi == 0) {
+    //   dq = dy = 1;
+    // } else if (phi > 10) {
+    //   dq = dy = 1 + 0.1 * (Df / 2) * Math.pow(Nphi, 1 / 2);
+    // }
     //inclination factor
-    ic = iq = 1 - inclinationToVertical / 90;
-    iy = Math.pow(1 - inclinationToVertical / phi, 2);
-    console.log(
-      [sc, sq, sy],
-      [dc, dq, dy],
-      [ic, iq, iy],
-      [Nc, Nq, Ny],
-      { c: c },
-      { Df: Df },
-      { y: y },
-      {
-        bearing_capacity:
-          c * Nc * sc * dc * ic +
-          (y * Df * Nq * sq * dq * iq) / 1000 +
-          (0.5 * y * 200 * Ny * sy * dy * iy) / 1000,
-      }
-    );
-    return (
-      c * Nc * sc * dc * ic +
-      (y * Df * Nq * sq * dq * iq) / 1000 +
-      (0.5 * y * 200 * Ny * sy * dy * iy) / 1000
-    );
+    // ic = iq = 1 - inclinationToVertical / 90;
+    // iy = Math.pow(1 - inclinationToVertical / phi, 2);
+    // console.log(
+    // [sc, sq, sy],
+    //   [dc, dq, dy],
+    //   [ic, iq, iy],
+    // [Nc, Nq, Ny, "meyerhoff"]
+    //   { c: c },
+    //   { Df: Df },
+    //   { y: y },
+    //   {
+    //     bearing_capacity:
+    //       (c * Nc * sc * dc * ic +
+    //         y * Df * Nq * sq * dq * iq +
+    //         0.5 * y * 2 * Ny * sy * dy * iy) /
+    //       30,
+    //   }
+    // );
+    return c * Nc + y * Df * Nq + 0.5 * y * 2 * Ny;
   }
 }
 
@@ -181,11 +187,11 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
   const [voidRatio, setVoidRatio] = useState(0);
   const [submergedUnitWeight, setSubmergedUnitWeight] = useState(
     specificGravity !== 0
-      ? roundTo((0.981 * (specificGravity - 1)) / (1 + voidRatio), 3)
+      ? roundTo((9.81 * (specificGravity - 1)) / (1 + voidRatio), 3)
       : 0
   );
   const [overBurdenPressure, setOverBurdenPressure] = useState(
-    (submergedUnitWeight * Df) / 1000
+    submergedUnitWeight * Df
   );
   const [NValue, setNValue] = useState(0);
   const [phi, setPhi] = useState(0);
@@ -205,9 +211,9 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
   });
 
   const [depthFactors, setDepthFactors] = useState({
-    dc: 1 + 0.2 * (Df / 200) * Math.sqrt(Nphi),
-    dq: phi < 10 ? 1 : 1 + 0.1 * (Df / 200) * Math.sqrt(Nphi),
-    dy: phi < 10 ? 1 : 1 + 0.1 * (Df / 200) * Math.sqrt(Nphi),
+    dc: 1 + 0.2 * (Df / 2) * Math.sqrt(Nphi),
+    dq: phi < 10 ? 1 : 1 + 0.1 * (Df / 2) * Math.sqrt(Nphi),
+    dy: phi < 10 ? 1 : 1 + 0.1 * (Df / 2) * Math.sqrt(Nphi),
   });
 
   const [inclinationFactors, setInclinationFactors] = useState({
@@ -233,19 +239,19 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
     if (changedOnce) {
       setSubmergedUnitWeight(
         specificGravity !== 0
-          ? roundTo((0.981 * (specificGravity - 1)) / (1 + voidRatio), 3)
+          ? roundTo((9.81 * (specificGravity - 1)) / (1 + voidRatio), 3)
           : 0
       );
-      setOverBurdenPressure((submergedUnitWeight * Df) / 1000);
+      setOverBurdenPressure(submergedUnitWeight * Df);
       setNphi(Math.pow(Math.tan(Math.PI / 4 + degreeToRadians(phi) / 2), 2));
       setBearingCapacityFactors(calculateBearingCapacityFactors(phi, "iscode"));
       setTerzaghiFactors(calculateBearingCapacityFactors(phi, "terzaghi"));
       setMeyerHoffFactors(calculateBearingCapacityFactors(phi, "meyerhoff"));
       // console.log(bearingCapacityFactors);
       setDepthFactors({
-        dc: 1 + 0.2 * (Df / 200) * Math.sqrt(Nphi),
-        dq: phi < 10 ? 1 : 1 + 0.1 * (Df / 200) * Math.sqrt(Nphi),
-        dy: phi < 10 ? 1 : 1 + 0.1 * (Df / 200) * Math.sqrt(Nphi),
+        dc: 1 + 0.2 * (Df / 2) * Math.sqrt(Nphi),
+        dq: phi < 10 ? 1 : 1 + 0.1 * (Df / 2) * Math.sqrt(Nphi),
+        dy: phi < 10 ? 1 : 1 + 0.1 * (Df / 2) * Math.sqrt(Nphi),
       });
       setInclinationFactors({
         ic: Math.pow(1 - inclinationToVertical / 90, 2),
@@ -317,7 +323,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
             <input
               type={`number`}
               required
-              placeholder="Please enter the value in g/cm^3"
+              placeholder="Please enter the value in kg/m^3"
               onChange={(e) => {
                 setUnitWeight(parseFloat(e.target.value));
               }}
@@ -348,11 +354,11 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
           </span>
           <span className="">
             γ<sup>'</sup> (submerged unit weight of soil) = γ<sub>w</sub>
-            *(G-1)/(1+e) = {submergedUnitWeight} Kg/m<sup>3</sup>
+            *(G-1)/(1+e) = {submergedUnitWeight} KN/m<sup>3</sup>
           </span>
           <span>
-            Overburden Pressure (q) : (γ<sup>'</sup>*D)/1000 ={" "}
-            {overBurdenPressure}
+            Overburden Pressure (q) : (γ<sup>'</sup>*D) ={" "}
+            {roundTo(overBurdenPressure, 3)} KN/m<sup>2</sup>
           </span>
           <span>
             N:{" "}
@@ -378,7 +384,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
             <input
               type={`number`}
               required
-              placeholder="Please enter the unit as Kg/cm^2"
+              placeholder="Please enter the unit as KN/m^2"
               onChange={(e) => {
                 setCohesion(parseFloat(e.target.value));
               }}
@@ -388,14 +394,14 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
         <p className="info-title">Assumptions</p>
         <div className="site-info">
           <div>
-            Width of foundation (B) = <span>200cm</span>
+            Width of foundation (B) = <span>2 m</span>
           </div>
           <div>
             Depth of foundation below Ground Level (D<sub>f</sub>) ={" "}
-            <span>{Df} cm</span>
+            <span>{Df} m</span>
           </div>
           <div>
-            Length of foundation (l) = <span>200cm</span>
+            Length of foundation (l) = <span>2 m</span>
           </div>
           <div>Shape of base ={">"} Square</div>
         </div>
@@ -438,11 +444,11 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
         {/* add div for calculating Nc,Nq and Ny */}
         <div className="site-info">
           <span className="shear-params">
-            &emsp; N<sub>c</sub> = {bearingCapacityFactors.Nc}
+            &emsp; N<sub>c</sub> = {roundTo(bearingCapacityFactors.Nc, 3)}
             <br />
-            &emsp; N<sub>q</sub> = {bearingCapacityFactors.Nq}
+            &emsp; N<sub>q</sub> = {roundTo(bearingCapacityFactors.Nq, 3)}
             <br />
-            &emsp; N<sub>γ</sub> = {bearingCapacityFactors.Ny}
+            &emsp; N<sub>γ</sub> = {roundTo(bearingCapacityFactors.Ny, 3)}
           </span>
         </div>
         {/* div for caluclating shape factor */}
@@ -527,7 +533,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
             />
             <label htmlFor="option1">
               Is water table likely to permanently remain at or below a depth of{" "}
-              {Df + 200} cms (D<sub>f</sub> + B) beneath the ground level
+              {Df + 2} mts (D<sub>f</sub> + B) beneath the ground level
               surrounding the footing?
             </label>
           </span>
@@ -544,7 +550,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               }}
             />
             <label htmlFor="option2">
-              Is water table located at a depth {Df} cms (D<sub>f</sub>) or
+              Is water table located at a depth {Df} mts (D<sub>f</sub>) or
               likey to rise to the base of the footing or above?
             </label>
           </span>
@@ -563,7 +569,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               />
               <label htmlFor="option3">
                 Is the water table likely to permanent get located at depth
-                lying between {Df} (D<sub>f</sub>) and {Df + 200} cms (D
+                lying between {Df} (D<sub>f</sub>) and {Df + 2} mts (D
                 <sub>f</sub> + B)?
               </label>
             </div>
@@ -577,7 +583,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                   onChange={(e) => {
                     let local_water_table_factor = 0;
                     local_water_table_factor =
-                      (Df - parseInt(e.target.value, 10)) / 400 + 1;
+                      (Df - parseInt(e.target.value, 10)) / 4 + 1;
                     setWaterTableFactor(local_water_table_factor);
                   }}
                 />
@@ -649,7 +655,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                     waterTableFactor,
                     Df,
                     "iscode"
-                  ) * 10,
+                  ) / 10,
                   3
                 )}{" "}
             ton/m<sup>2</sup>
@@ -687,7 +693,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               {FOS} ={" "}
               <strong>
                 {roundTo(
-                  (calculateNetBearingCapacity(
+                  calculateNetBearingCapacity(
                     phi,
                     inclinationToVertical,
                     cohesion,
@@ -709,19 +715,18 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                     Df,
                     "iscode"
                   ) /
-                    FOS) *
-                    10,
+                    (10 * FOS),
                   3
                 )}{" "}
                 ton/m<sup>2</sup>
               </strong>
             </div>
-            <div>
+            {/* <div>
               <p>
                 <strong>Safe Bearing Capacity (SBC)</strong> : NSBC + q ={" "}
                 <strong>
                   {roundTo(
-                    (calculateNetBearingCapacity(
+                    calculateNetBearingCapacity(
                       phi,
                       inclinationToVertical,
                       cohesion,
@@ -743,15 +748,13 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                       Df,
                       "iscode"
                     ) /
-                      FOS +
-                      overBurdenPressure) *
-                      10,
+                      (10 * FOS),
                     3
                   )}{" "}
                   ton/m<sup>2</sup>
                 </strong>
               </p>
-            </div>
+            </div> */}
           </div>
         )}
       </form>
@@ -783,7 +786,7 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
               <td>{phi}</td>
               <td>
                 {roundTo(
-                  (calculateNetBearingCapacity(
+                  calculateNetBearingCapacity(
                     phi,
                     inclinationToVertical,
                     cohesion,
@@ -805,16 +808,14 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                     Df,
                     "iscode"
                   ) /
-                    FOS +
-                    overBurdenPressure) *
-                    10,
+                    (10 * FOS),
                   3
                 )}{" "}
                 ton/m<sup>2</sup>
               </td>
               <td>
                 {roundTo(
-                  (calculateNetBearingCapacity(
+                  calculateNetBearingCapacity(
                     phi,
                     inclinationToVertical,
                     cohesion,
@@ -836,16 +837,14 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                     Df,
                     "terzaghi"
                   ) /
-                    3 +
-                    overBurdenPressure) *
-                    10,
+                    (3 * 10),
                   3
                 )}{" "}
                 ton/m<sup>2</sup>
               </td>
               <td>
-                {roundTo(
-                  (calculateNetBearingCapacity(
+                {!isNaN(
+                  calculateNetBearingCapacity(
                     phi,
                     inclinationToVertical,
                     cohesion,
@@ -866,12 +865,34 @@ const LevelDataCollector = ({ location, BoreLogNumber }) => {
                     waterTableFactor,
                     Df,
                     "meyerhoff"
-                  ) /
-                    3 +
-                    overBurdenPressure) *
-                    10,
-                  3
-                )}{" "}
+                  )
+                )
+                  ? roundTo(
+                      calculateNetBearingCapacity(
+                        phi,
+                        inclinationToVertical,
+                        cohesion,
+                        bearingCapacityFactors.Nc,
+                        shapeFactors.sc,
+                        inclinationFactors.ic,
+                        depthFactors.dc,
+                        overBurdenPressure,
+                        bearingCapacityFactors.Nq,
+                        shapeFactors.sq,
+                        depthFactors.dq,
+                        inclinationFactors.iq,
+                        unitWeight,
+                        bearingCapacityFactors.Ny,
+                        shapeFactors.sy,
+                        depthFactors.dy,
+                        inclinationFactors.iq,
+                        waterTableFactor,
+                        Df,
+                        "meyerhoff"
+                      ) / 30,
+                      3
+                    )
+                  : "0"}{" "}
                 ton/m<sup>2</sup>
               </td>
             </tr>
